@@ -1,0 +1,29 @@
+language: bash
+
+services: docker
+
+env:
+  global:
+    - secure: "Rv175SL+pVge00p5ZtywlKdDKqkmPcUmYOawAUXcRxhedIIVn+syyH+IMa/eXoWuer+10DOn9he5D3VhaeDXuz6wV91Gffahcz4TJKLa/Zh7gtg72kkt6cPzV9mtP4pyus3duaXCyeN4qcrsMFdJiy/7NGi5ZEP2c/VE42X3ZR3ExSGW+Yxd0qGHrpvViPMKtYB8pnryHVJysv/DRXjbC+RY40lzSYEY4eRRu0fdSfAbIVgeJzLcAbSlUvUqfm/2E2FAk8BHDl8hBmX/Yj9FjWJT+jdNrKmlW/kOwsUrebBluQ7BASpUItZju0e7PZXeJBP48gjrMbbAFKv+e7mO5QCFc3Prnz3KkB2HFOMdAlBz0lyk2hEfOQ9btIvTINrOQ4NNvJAKqORwYJAtPb6Fq/PBCtNmDy9o8EUjqyBqyes9v3t9SE1xGqU7JkjliBPj1k8nKrur4RtFCmZgBdBh90w9EXjDMTSAlw94ELnObzmtUfKndFKtnHk8duxdpav281rV5Xo6HfuljJ3NjbSdAvTAgEDwh1IjWQj0YzRXDTh1AJzUrptomgE9Nodvkpa8gHp52mmOqG4OyKKrfneHLYsfWMwqDXPyTX/UnLSgjbnXlCmYIegsoylN0yE+7Z5Gd1+nKAUVeYp+ZTgLByqZkx5iswAGSNrkfmdZDWycV4M="
+    - secure: "VWy8+ursVrv38sBP7fATr7TyMeRnJmhCXSarpRXLGva60hTh1YhVF/eB7hbTULXW2T5HyUPNvTU6mNQ0jDTvFBsQfrxZHiz/0x8maYR7xpQ7sE4THCLT8omAgldFueHYXBj0gJIVenUmgXsi4JajkPLqbPYDWqj6gEux2hZaQFVom2P/RjJ1DBBuk1/O2MQ/VdVucAg7l0lV/BWAtkcOKdENsQ53lK3mbUCRhHe01bglmFGDDDGZ6oPps8c2kfmKa+fGZOWLSaAgThyY6sKcQZVNU37gS3tQ25orPwPNfPifedVgDSc1MAmC3bNg8cDYfkmNmXQv5BSd0amyc9zfUFiSx60T0in9kCpj6Hk7vgH7OfniaYr6JaTzuyuAt5B4sFOCsxZv5TQMB1GeXDXWYreA4bkdKs338GMj7W5aCmSGHOT0qGlaDXdfw1fWzBkfqxc2LyVdjF+TFr0KHUfQUB5TiXcyCaRVvz/Ej+M7XFmD9PPorpLDDKX1jEBXgy1vl1g+xygno7uRUne6PuAsj/DSKj/nxvL6unn0uAFlVm1URXab1e9qCbvjqkSRhDxZbiNzeMGshvuKLsAfyPuFBWgh058P1ehmllDtIFUOAHLyrUQHLbXs/wbWayerwPmceohHcz/46Os5Feti7foJswouk+E4TiFFtyC7/kFGxBU="
+  matrix:
+    - VERSION=php-7.1
+    - VERSION=latest VERSION_ALIAS=php-7.1
+
+before_script:
+  - if [[ "$VERSION" != "latest" ]]; then cd "src/$VERSION"; fi
+  - if [[ "$VERSION" == "latest" ]]; then cd "src/$VERSION_ALIAS"; fi
+  - IMAGE_NAME="chesszebra/$(echo "$TRAVIS_REPO_SLUG" | cut -c 25-):${VERSION}"
+
+script:
+  - docker build -t "$IMAGE_NAME" .
+
+after_success:
+  - docker login --username $DOCKER_USER --password $DOCKER_PASS
+  - docker push $IMAGE_NAME
+
+after_script:
+  - docker images
+
+notifications:
+  email: false
